@@ -5,10 +5,13 @@ import { useRecipe } from '../hooks/useRecipes'
 import { getErrorMessage } from '../utils/errorHandler'
 import type { Recipe } from '../types'
 
-// TODO 3.2 (Detalle): descargue la ficha como archivo receta-{id}.json.
-// Use un Blob con JSON.stringify(item, null, 2), URL.createObjectURL, un <a download> temporal
-// y libere la URL con URL.revokeObjectURL al terminar.
-function downloadFile(item: Recipe) {
+// TODO 3.2 (Detalle y descarga): descargue la imagen del receta como archivo receta-{id}.<extensión>.
+//  - Pida la imagen (item.image) con axios y responseType: 'blob'.
+//  - Cree una URL temporal con URL.createObjectURL, descárguela con un <a download> y libérela con
+//    URL.revokeObjectURL al terminar.
+//  - La extensión sale del tipo del Blob (por ejemplo image/webp).
+//  - Si falla, muestre toast.error con getErrorMessage.
+async function downloadImage(item: Recipe) {
   void item
 }
 
@@ -43,7 +46,7 @@ function RecipeDetailPage() {
               <ul className="list-disc pl-5 text-sm text-slate-600">{data.ingredients.map((i) => <li key={i}>{i}</li>)}</ul>
               <h2 className="font-semibold">Instrucciones</h2>
               <ol className="list-decimal pl-5 text-sm text-slate-600">{data.instructions.map((i) => <li key={i}>{i}</li>)}</ol>
-              <Button onClick={() => downloadFile(data)}>Descargar receta</Button>
+              <Button onClick={() => downloadImage(data)}>Descargar imagen</Button>
             </div>
           </article>
       )}
