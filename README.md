@@ -28,7 +28,7 @@ del requisito del enunciado y qué debe hacer. Los archivos con TODO son:
 | 1.5, 2.3, 4.4, 5.2, 6.1 | `src/pages/RecipesPage.tsx` |
 | 2.1, 3.1, 4.3, 4.4 | `src/services/recipeService.ts` |
 | 2.2, 3.1, 4.3, 4.4 | `src/hooks/useRecipes.ts` |
-| 3.1, 3.2 | `src/pages/RecipeDetailPage.tsx` |
+| 3.1, 3.2, 3.3 | `src/pages/RecipeDetailPage.tsx` (`fichaText` ya viene hecha en `src/utils/ficha.ts`) |
 | 4.1, 4.2, 4.3 | `src/components/RecipeForm.tsx` |
 | 5.1 | `src/utils/errorHandler.ts` |
 | 5.3 | `src/App.tsx` |

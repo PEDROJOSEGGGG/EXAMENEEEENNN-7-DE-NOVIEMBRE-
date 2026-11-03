@@ -15,6 +15,13 @@ async function downloadImage(item: Recipe) {
   void item
 }
 
+// TODO 3.3 (Detalle y descarga): descargue la ficha de texto. Importe fichaText de ../utils/ficha: esa función
+// ya arma el texto. Cree un Blob de tipo text/plain con ese texto y descárguelo como receta-{id}.txt con
+// URL.createObjectURL y un <a download>; libere la URL con URL.revokeObjectURL al terminar.
+function downloadFicha(item: Recipe) {
+  void item
+}
+
 function RecipeDetailPage() {
   const { id } = useParams()
   // TODO 3.1: useRecipe(Number(id)) ya devuelve los datos cuando complete el hook.
@@ -46,7 +53,10 @@ function RecipeDetailPage() {
               <ul className="list-disc pl-5 text-sm text-slate-600">{data.ingredients.map((i) => <li key={i}>{i}</li>)}</ul>
               <h2 className="font-semibold">Instrucciones</h2>
               <ol className="list-decimal pl-5 text-sm text-slate-600">{data.instructions.map((i) => <li key={i}>{i}</li>)}</ol>
-              <Button onClick={() => downloadImage(data)}>Descargar imagen</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => downloadImage(data)}>Descargar imagen</Button>
+                <Button variant="outline" onClick={() => downloadFicha(data)}>Descargar ficha</Button>
+              </div>
             </div>
           </article>
       )}
