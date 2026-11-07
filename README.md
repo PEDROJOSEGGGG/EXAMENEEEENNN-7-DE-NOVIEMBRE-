@@ -49,4 +49,6 @@ La aplicación queda disponible en `http://localhost:5173`. La API consumida es 
 
 ## 🌐 Despliegue
 
+Sitio en producción: https://exameneeeennn-7-de-noviembre-1.onrender.com
+
 El sitio se despliega como aplicación estática (SPA); las rutas internas de React Router se redirigen a `index.html` mediante la configuración incluida (`vercel.json`).
