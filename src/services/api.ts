@@ -10,9 +10,9 @@ export const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const accessToken = useAuthStore.getState().accessToken
-  if (accessToken && config.headers) {
-    config.headers.Authorization = `Bearer ${accessToken}`
+  const token = useAuthStore.getState().accessToken
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
@@ -20,29 +20,32 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config
+    const failedRequest = error.config
+    const isAuthError = error.response?.status === 401
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      originalRequest._retry = true
-
-      try {
-        const refreshToken = useAuthStore.getState().refreshToken
-        if (!refreshToken) throw new Error('No existe refresh token')
-
-        const nextTokens = await authService.refresh(refreshToken)
-        useAuthStore.getState().setTokens(nextTokens.accessToken, nextTokens.refreshToken)
-
-        originalRequest.headers = originalRequest.headers ?? {}
-        originalRequest.headers.Authorization = `Bearer ${nextTokens.accessToken}`
-
-        return api(originalRequest)
-      } catch (refreshError) {
-        useAuthStore.getState().logout()
-        window.location.assign('/login')
-        return Promise.reject(refreshError)
-      }
+    if (!isAuthError || !failedRequest || failedRequest._retry) {
+      return Promise.reject(error)
     }
 
-    return Promise.reject(error)
+    failedRequest._retry = true
+
+    try {
+      const { refreshToken } = useAuthStore.getState()
+      if (!refreshToken) {
+        throw new Error('No existe refresh token')
+      }
+
+      const refreshed = await authService.refresh(refreshToken)
+      useAuthStore.getState().setTokens(refreshed.accessToken, refreshed.refreshToken)
+
+      failedRequest.headers = failedRequest.headers ?? {}
+      failedRequest.headers.Authorization = `Bearer ${refreshed.accessToken}`
+
+      return api(failedRequest)
+    } catch (refreshFailure) {
+      useAuthStore.getState().logout()
+      window.location.assign('/login')
+      return Promise.reject(refreshFailure)
+    }
   },
 )

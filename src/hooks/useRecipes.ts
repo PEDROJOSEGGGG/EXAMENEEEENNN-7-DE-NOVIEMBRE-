@@ -4,19 +4,23 @@ import { recipeService } from '../services/recipeService'
 import type { ListFilters } from '../types'
 import { getErrorMessage } from '../utils/errorHandler'
 
+const RECIPES_KEY = 'recipes'
+
 export function useRecipes(filters: ListFilters) {
   return useQuery({
-    queryKey: ['recipes', filters],
+    queryKey: [RECIPES_KEY, filters],
     queryFn: () => recipeService.list(filters),
-    placeholderData: (previousData) => previousData,
+    placeholderData: (prev) => prev,
   })
 }
 
 export function useRecipe(id: number) {
+  const isValidId = Number.isFinite(id) && id > 0
+
   return useQuery({
     queryKey: ['recipe', id],
     queryFn: () => recipeService.getById(id),
-    enabled: Number.isFinite(id) && id > 0,
+    enabled: isValidId,
     retry: false,
   })
 }
@@ -25,14 +29,12 @@ export function useCreateRecipe() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: FormData) => recipeService.create(body),
+    mutationFn: (formData: FormData) => recipeService.create(formData),
     onSuccess: () => {
       toast.success('Receta creada con éxito')
-      queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      return queryClient.invalidateQueries({ queryKey: [RECIPES_KEY] })
     },
-    onError: (error) => {
-      toast.error(getErrorMessage(error))
-    },
+    onError: (err) => toast.error(getErrorMessage(err)),
   })
 }
 
@@ -40,13 +42,11 @@ export function useDeleteRecipe() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (id: number) => recipeService.remove(id),
+    mutationFn: (recipeId: number) => recipeService.remove(recipeId),
     onSuccess: () => {
       toast.success('Receta eliminada')
-      queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      return queryClient.invalidateQueries({ queryKey: [RECIPES_KEY] })
     },
-    onError: (error) => {
-      toast.error(getErrorMessage(error))
-    },
+    onError: (err) => toast.error(getErrorMessage(err)),
   })
 }

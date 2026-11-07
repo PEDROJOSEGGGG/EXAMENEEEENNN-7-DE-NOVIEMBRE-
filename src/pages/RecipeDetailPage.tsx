@@ -1,30 +1,39 @@
+import axios from 'axios'
 import { Link, useParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useRecipe } from '../hooks/useRecipes'
 import { getErrorMessage } from '../utils/errorHandler'
+import { fichaText } from '../utils/ficha'
 import type { Recipe } from '../types'
 
-// TODO 3.2 (Detalle y descarga): descargue la imagen del receta como archivo receta-{id}.<extensión>.
-//  - Pida la imagen (item.image) con axios y responseType: 'blob'.
-//  - Cree una URL temporal con URL.createObjectURL, descárguela con un <a download> y libérela con
-//    URL.revokeObjectURL al terminar.
-//  - La extensión sale del tipo del Blob (por ejemplo image/webp).
-//  - Si falla, muestre toast.error con getErrorMessage.
-async function downloadImage(item: Recipe) {
-  void item
+function triggerDownload(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
-// TODO 3.3 (Detalle y descarga): descargue la ficha de texto. Importe fichaText de ../utils/ficha: esa función
-// ya arma el texto. Cree un Blob de tipo text/plain con ese texto y descárguelo como receta-{id}.txt con
-// URL.createObjectURL y un <a download>; libere la URL con URL.revokeObjectURL al terminar.
+async function downloadImage(item: Recipe) {
+  try {
+    const response = await axios.get<Blob>(item.image, { responseType: 'blob' })
+    const extension = response.data.type.split('/')[1] ?? 'jpg'
+    triggerDownload(response.data, `receta-${item.id}.${extension}`)
+  } catch (err) {
+    toast.error(getErrorMessage(err))
+  }
+}
+
 function downloadFicha(item: Recipe) {
-  void item
+  const blob = new Blob([fichaText(item)], { type: 'text/plain' })
+  triggerDownload(blob, `receta-${item.id}.txt`)
 }
 
 function RecipeDetailPage() {
   const { id } = useParams()
-  // TODO 3.1: useRecipe(Number(id)) ya devuelve los datos cuando complete el hook.
   const { data, isLoading, isError, error } = useRecipe(Number(id))
 
   return (
@@ -35,7 +44,6 @@ function RecipeDetailPage() {
 
       {isLoading && <p className="mt-6 text-slate-500" role="status">Cargando…</p>}
 
-      {/* TODO 3.1: si el id no existe (404) debe verse un mensaje claro con getErrorMessage. */}
       {isError && (
         <Alert variant="destructive" className="mt-6">
           <AlertDescription>{getErrorMessage(error)}</AlertDescription>
