@@ -6,20 +6,29 @@ interface AuthState {
   user: AuthUser | null
   accessToken: string | null
   refreshToken: string | null
-  setSession: (login: LoginResponse) => void
+  setSession: (response: LoginResponse) => void
   setTokens: (accessToken: string, refreshToken: string) => void
   logout: () => void
 }
 
+const initialState = {
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+} satisfies Pick<AuthState, 'user' | 'accessToken' | 'refreshToken'>
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      setSession: (login) => set({ user: login, accessToken: login.accessToken, refreshToken: login.refreshToken }),
+      ...initialState,
+      setSession: (response) =>
+        set({
+          user: response,
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+        }),
       setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
-      logout: () => set({ user: null, accessToken: null, refreshToken: null }),
+      logout: () => set(initialState),
     }),
     { name: 'auth-storage' },
   ),
